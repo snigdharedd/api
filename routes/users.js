@@ -1,16 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-var secret = 'swethareddy56';
-let User = require('../models/user');
+const JWT = require('jsonwebtoken');
+const config = require('../config');
+const verifyToken = require('./VerifyToken');
+let User = require('../schema/user');
 
 router.get('/register',function(req,res){
-  res.render('register')
+  User.find({},function(err,users){
+    return res.json(users);
+  })
+
 })
 
 router.post('/register',function(req,res){
-  const id= req.body.id;
+  const ID = req.body.ID;
   const email= req.body.email;
   const phoneno= req.body.phoneno;
   const role= req.body.role;
@@ -19,7 +23,7 @@ router.post('/register',function(req,res){
   const password= req.body.password;
 
   let newuser = new User();
-  newuser.id= id;
+  newuser.ID = ID;
   newuser.email= email;
   newuser.phoneno= phoneno;
   newuser.role= role;
@@ -63,6 +67,8 @@ router.post('/login',function(req,res){
   var email = req.body.email;
   var phoneno = req.body.phoneno;
   var password = req.body.password;
+  var id=req.params.id;
+
   User.findOne({$or: [
     {'email':email},
     {'phoneno':phoneno}
@@ -71,19 +77,34 @@ router.post('/login',function(req,res){
       res.json('email or phoneno is wrong')
     }
     else if(user){
-      bcrypt.compare(password,user.password,function(err,user){
+      bcrypt.compare(password,user.password,function(err,result){
         if(err){
           console.log('err')
         }if(!user){
           res.json('wrong password')
         }else{
-          var token = jwt.sign({email:user.email,phoneno:user.phoneno},secret,{expiresIn : 45000})
-          res.json({user,token:token})
+
+          const token = JWT.sign( {id:user._id},config.secret);
+          return res.send({user:true,token:token})
+
         }
+
       })
     }
+
   })
-})
+ })
 
+  router.get('/getusers',verifyToken,function(req,res){
 
+          User.findById(req.userId,function(err,user){
+            res.send(user);
+          })
+        })
+
+      router.put('/update',verifyToken,function(req,res){
+        User.findByIdAndUpdate(req.userId,{firstname:req.body.firstname,lastname:req.body.lastname},function(user){
+          return res.send(user)
+          })
+        })
 module.exports=router;

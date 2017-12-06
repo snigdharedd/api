@@ -3,8 +3,8 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-var secret = 'swethareddy56';
+const JWT = require('jsonwebtoken');
+
 
 mongoose.connect('mongodb://localhost/monpost');
 
@@ -18,7 +18,7 @@ db.on('error',function(err){
   console.log(err);
 });
 
-let User = require('./models/user');
+let User = require('./schema/user');
 
 const app=express();
 app.set('views',path.join(__dirname,'views'));
