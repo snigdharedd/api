@@ -67,9 +67,7 @@ router.post('/login',function(req,res){
   var email = req.body.email;
   var phoneno = req.body.phoneno;
   var password = req.body.password;
-  var id=req.params.id;
-
-  User.findOne({$or: [
+    User.findOne({$or: [
     {'email':email},
     {'phoneno':phoneno}
   ]},function(err,user){
@@ -80,7 +78,7 @@ router.post('/login',function(req,res){
       bcrypt.compare(password,user.password,function(err,result){
         if(err){
           console.log('err')
-        }if(!user){
+        }if(!result){
           res.json('wrong password')
         }else{
 
