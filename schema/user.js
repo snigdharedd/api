@@ -1,12 +1,11 @@
 let mongoose = require('mongoose');
 
 let userSchema = mongoose.Schema({
-  ID:{
+ID:{
     type:Number,
     required:true
   },
-
-  email:{
+email:{
     type: String,
     required: true
   },
@@ -29,7 +28,15 @@ let userSchema = mongoose.Schema({
   password:{
     type: String,
     required: true
+  },
+  facebook:{
+    id: String,
+    token: String,
+    email: String,
+    name: String
   }
-});
+
+}
+);
 
 let User = module.exports=mongoose.model('User',userSchema);

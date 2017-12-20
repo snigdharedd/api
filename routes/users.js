@@ -1,9 +1,12 @@
 const express = require('express');
-const router = express.Router();
+const router=express.Router();
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const config = require('../config');
 const verifyToken = require('./VerifyToken');
+const path= require('path');
+const passport= require('passport');
+const FacebookStrategy= require('passport-facebook').Strategy;
 let User = require('../schema/user');
 
 router.get('/register',function(req,res){
@@ -59,14 +62,15 @@ router.post('/register',function(req,res){
 })
 })
 
-    router.get('/login',function(req,res){
-    res.render('login');
-})
+
+
+
 
 router.post('/login',function(req,res){
   var email = req.body.email;
-  var phoneno = req.body.phoneno;
   var password = req.body.password;
+  var phoneno= req.body.phoneno;
+
     User.findOne({$or: [
     {'email':email},
     {'phoneno':phoneno}
@@ -76,15 +80,11 @@ router.post('/login',function(req,res){
     }
     else if(user){
       bcrypt.compare(password,user.password,function(err,result){
-        if(err){
-          console.log('err')
-        }if(!result){
+        if(!result){
           res.json('wrong password')
         }else{
-
           const token = JWT.sign( {id:user._id},config.secret);
           return res.send({user:true,token:token})
-
         }
 
       })
@@ -92,6 +92,20 @@ router.post('/login',function(req,res){
 
   })
  })
+
+
+
+router.get('/auth/facebook',passport.authenticate('facebook', {scope:['public_profile','email']}))
+ router.get('/auth/facebook/callback',function(req,res,next){
+   passport.authenticate('facebook',{
+   successRedirect: '/profile',
+   failureRedirect: '/index'
+ })(req,res,next)
+})
+
+
+
+
 
   router.get('/getusers',verifyToken,function(req,res){
 
@@ -105,4 +119,5 @@ router.post('/login',function(req,res){
           return res.send(user)
           })
         })
+
 module.exports=router;
